@@ -204,6 +204,10 @@ func (s *Scanner) Start(start, end uint32) {
 		for result := range s.ipScanResults {
 			go s.portScan(result, start, end)
 		}
+		// @todo - I feel like this will cut-off
+		// too soon, but we need to close this
+		// channel in order to complete the next routine
+		close(s.portScanResults)
 	}()
 
 	// Here we sit and listen for port scan result
@@ -215,7 +219,7 @@ func (s *Scanner) Start(start, end uint32) {
 				s.Results <- result
 			}
 		}
-		s.quit <- true
+		s.Stop()
 	}()
 }
 
