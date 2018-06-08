@@ -9,7 +9,13 @@ Deep scan is highly concurrent and will utilise all available cores, making deep
 ## Installation
 
 ```
-$ curl -O  | bash
+$ git clone git@github.com:EwanValentine/deepscan.git && cd deepscan && go install
+```
+
+
+@TODO
+```
+$ curl -L https://raw.githubusercontent.com/EwanValentine/deepscan/master/install.sh | sudo bash
 ```
 
 ## Usage
