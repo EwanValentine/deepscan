@@ -12,16 +12,16 @@ Deep scan is highly concurrent and will utilise all available cores, making deep
 $ curl -O  | bash
 ```
 
-## Usage
+## Usage
 
-### Scan a single host
+### Scan a single host
 
 This will scan a single host, with a port range of 8000 to 9000.
 ```
 $ deepscan single 192.168.0.1 --ports 8000:9000
 ```
 
-### Multiple hosts
+### Multiple hosts
 This will scan every IP in a given CIDR block, with a port range of 1000 to 2000.
 ```
 $ deepscan multiple 192.168.1.1/24 --ports 1000:2000
