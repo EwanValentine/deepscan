@@ -155,7 +155,8 @@ func (s *Scanner) portScan(result *Result, start, end uint32) {
 
 			// log.Println("Scanning port:", port, "on ip:", result.Addr)
 
-			// Connect with a 5 second timeout
+			// Connect with a 1 second timeout
+			// @todo - make this configurable?
 			connection, err := net.DialTimeout(
 				"tcp", result.Addr+":"+fmt.Sprintf("%d", port),
 				time.Duration(1*time.Second)*time.Second,
