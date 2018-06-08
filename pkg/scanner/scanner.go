@@ -204,7 +204,6 @@ func (s *Scanner) Start(start, end uint32) {
 		for result := range s.ipScanResults {
 			go s.portScan(result, start, end)
 		}
-		close(s.portScanResults)
 	}()
 
 	// Here we sit and listen for port scan result
