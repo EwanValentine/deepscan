@@ -1,7 +1,6 @@
 package scanner
 
 import (
-	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,9 +11,15 @@ func TestCanScanCIDRBlock(t *testing.T) {
 	assert.NoError(t, err)
 	s.Network("192.168.1.1/24")
 	assert.Equal(t, 254, len(s.ips))
-	s.Start(80, 88)
+	s.Start(80, 85)
 	<-s.OnStop()
-	log.Println("test", s.portsScanned)
-	log.Println("test 2", uint32(len(s.ips)))
-	assert.Equal(t, uint32(8)*uint32(len(s.ips)), s.portsScanned)
+	assert.Equal(t, uint32(6)*uint32(len(s.ips)), s.portsScanned)
+}
+
+func TestCanScanSingleIP(t *testing.T) {
+	s, err := New()
+	assert.NoError(t, err)
+	s.Single("192.168.1.1", 80, 85)
+	<-s.OnStop()
+	assert.Equal(t, uint32(6), s.portsScanned)
 }
