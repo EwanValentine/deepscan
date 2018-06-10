@@ -52,8 +52,7 @@ func (s *Scanner) Network(cidr string) error {
 	if err != nil {
 		return err
 	}
-	batchSize := 20
-	results := make(chan *Result, len(ips)/batchSize)
+	results := make(chan *Result, len(ips))
 	s.Results = results
 	s.ips = ips
 	return nil
@@ -77,13 +76,6 @@ func (s *Scanner) scan(ip string) *Result {
 	}
 }
 
-// output takes a result object, this is the result of the
-// ip scan, it also takes a start and an end port number.
-// It will then create a wait group, iterate through each
-// port number concurrently until it reaches the end port.
-// it will store each result on the result object, when it has
-// reached the end, it will push the result onto the port
-// scan results channel.
 func (s *Scanner) scanPort(outcome chan *Result, result *Result, port uint32, wg *sync.WaitGroup) {
 	defer wg.Done()
 	s.portsScanned++
