@@ -14,12 +14,6 @@ Deep scan is highly concurrent and will utilise all available cores, making deep
 $ git clone git@github.com:EwanValentine/deepscan.git && cd deepscan && go install
 ```
 
-
-@TODO
-```
-$ curl -L https://raw.githubusercontent.com/EwanValentine/deepscan/master/install.sh | sudo bash
-```
-
 ## Usage
 
 ### Scan a single host
