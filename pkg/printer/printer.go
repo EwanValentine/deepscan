@@ -7,16 +7,22 @@ import (
 	"github.com/fatih/color"
 )
 
+// Scans defines the sub-set of
+// methods needed for the printer
+type Scans interface {
+	Listen() <-chan *scanner.Result
+	Close()
+	OnStop() <-chan bool
+}
+
 // Print takes the scanner and prints out the results
 // with the correct formatting, and the does some
 // clean-up operations when complete.
-func Print(ds *scanner.Scanner) bool {
+func Print(ds Scans) bool {
 	for {
 		select {
 		case res := <-ds.Listen():
-			for _, port := range res.PortScan {
-				color.Blue(fmt.Sprintf("Open: %s:%d", res.Addr, port.Port))
-			}
+			color.Blue(fmt.Sprintf("Open: %s:%d", res.Addr, res.PortScan.Port))
 			for _, host := range res.ReverseLookup {
 				color.Blue(fmt.Sprintf("Host: %s", host))
 			}
