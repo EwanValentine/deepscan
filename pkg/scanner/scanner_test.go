@@ -15,5 +15,6 @@ func TestCanScanCIDRBlock(t *testing.T) {
 	s.Start(80, 88)
 	<-s.OnStop()
 	log.Println("test", s.portsScanned)
-	assert.Equal(t, uint32(8), s.portsScanned)
+	log.Println("test 2", uint32(len(s.ips)))
+	assert.Equal(t, uint32(8)*uint32(len(s.ips)), s.portsScanned)
 }
