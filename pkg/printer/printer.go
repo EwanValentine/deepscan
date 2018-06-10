@@ -13,6 +13,7 @@ type Scans interface {
 	Listen() <-chan *scanner.Result
 	Close()
 	OnStop() <-chan bool
+	Stats() string
 }
 
 // Print takes the scanner and prints out the results
@@ -31,6 +32,7 @@ func Print(ds Scans) bool {
 		case <-ds.OnStop():
 			ds.Close()
 			color.Blue("Complete...")
+			color.Green(ds.Stats())
 			return true
 		}
 	}

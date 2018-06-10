@@ -30,6 +30,11 @@ type Scanner struct {
 	Results chan *Result
 	ips     []string
 	quit    chan bool
+
+	// Stats
+	start        time.Time
+	end          time.Time
+	portsScanned uint32
 }
 
 // New scanner constructor
@@ -37,7 +42,7 @@ func New() (*Scanner, error) {
 	results := make(chan *Result, 1)
 	quit := make(chan bool)
 	ips := []string{}
-	return &Scanner{results, ips, quit}, nil
+	return &Scanner{results, ips, quit, time.Now(), time.Now(), 0}, nil
 }
 
 // Network allows for a network CIDR range to be set
@@ -81,6 +86,7 @@ func (s *Scanner) scan(ip string) *Result {
 // scan results channel.
 func (s *Scanner) scanPort(outcome chan *Result, result *Result, port uint32, wg *sync.WaitGroup) {
 	defer wg.Done()
+	s.portsScanned++
 	// Connect with a 5 second timeout
 	// @todo - make this configurable?
 	connection, err := net.DialTimeout(
@@ -135,6 +141,7 @@ func (s *Scanner) filterResults(results <-chan *Result) {
 			}
 		}
 		s.Stop()
+		s.end = time.Now()
 	}()
 }
 
@@ -193,4 +200,15 @@ func (s *Scanner) Stop() {
 // OnStop blocks until complete
 func (s *Scanner) OnStop() <-chan bool {
 	return s.quit
+}
+
+// Stats returns
+func (s *Scanner) Stats() string {
+	duration := s.end.Sub(s.start).Seconds()
+	return fmt.Sprintf(
+		"Scanned %d ips and %d ports in %f seconds",
+		len(s.ips),
+		s.portsScanned,
+		duration,
+	)
 }
