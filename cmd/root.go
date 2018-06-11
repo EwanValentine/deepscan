@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"log"
 	"time"
 
 	"github.com/EwanValentine/deepscan/pkg/ports"
@@ -55,24 +54,25 @@ func Execute() {
 		s := spinner.New(spinner.CharSets[21], 100*time.Millisecond)
 		s.Start()
 		defer s.Stop()
-		ds, err := scanner.New()
-		if err != nil {
-			log.Panic(err)
-		}
+		ds := scanner.New()
 		start, end, err := ports.ConvertPortRange(*portRange)
-		ds.Single(*ip, start, end)
+		if err != nil {
+			panic(err)
+		}
+		ds.Target(*ip)
+		ds.Start(start, end)
 		printer.Print(ds)
 
 	case "multiple":
 		s := spinner.New(spinner.CharSets[21], 100*time.Millisecond)
 		s.Start()
 		defer s.Stop()
-		ds, err := scanner.New()
-		if err != nil {
-			log.Panic(err)
-		}
+		ds := scanner.New()
 		ds.Network(*cidr)
 		start, end, err := ports.ConvertPortRange(*portRange)
+		if err != nil {
+			panic(err)
+		}
 		ds.Start(start, end)
 		printer.Print(ds)
 	}

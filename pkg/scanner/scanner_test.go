@@ -7,8 +7,7 @@ import (
 )
 
 func TestCanScanCIDRBlock(t *testing.T) {
-	s, err := New()
-	assert.NoError(t, err)
+	s := New()
 	s.Network("192.168.1.1/24")
 	assert.Equal(t, 254, len(s.ips))
 	s.Start(80, 85)
@@ -17,9 +16,9 @@ func TestCanScanCIDRBlock(t *testing.T) {
 }
 
 func TestCanScanSingleIP(t *testing.T) {
-	s, err := New()
-	assert.NoError(t, err)
-	s.Single("192.168.1.1", 80, 85)
+	s := New()
+	s.Target("192.168.1.1")
+	s.Start(80, 85)
 	<-s.OnStop()
 	assert.Equal(t, uint32(6), s.portsScanned)
 }
