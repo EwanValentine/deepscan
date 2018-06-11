@@ -11,7 +11,7 @@ Deep scan is highly concurrent and will utilise all available cores, making deep
 ## Installation
 
 ```
-$ git clone git@github.com:EwanValentine/deepscan.git && cd deepscan && go install
+$ go get github.com/EwanValentine/deepscan
 ```
 
 ## Usage

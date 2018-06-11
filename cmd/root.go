@@ -49,30 +49,23 @@ func Execute() {
 	color.Red(title)
 	color.Yellow(subTitle)
 
+	s := spinner.New(spinner.CharSets[21], 100*time.Millisecond)
+	s.Start()
+	defer s.Stop()
+	ds := scanner.New()
+	start, end, err := ports.ConvertPortRange(*portRange)
+	if err != nil {
+		panic(err)
+	}
+
 	switch kingpin.Parse() {
 	case "single":
-		s := spinner.New(spinner.CharSets[21], 100*time.Millisecond)
-		s.Start()
-		defer s.Stop()
-		ds := scanner.New()
-		start, end, err := ports.ConvertPortRange(*portRange)
-		if err != nil {
-			panic(err)
-		}
 		ds.Target(*ip)
 		ds.Start(start, end)
 		printer.Print(ds)
 
 	case "multiple":
-		s := spinner.New(spinner.CharSets[21], 100*time.Millisecond)
-		s.Start()
-		defer s.Stop()
-		ds := scanner.New()
 		ds.Network(*cidr)
-		start, end, err := ports.ConvertPortRange(*portRange)
-		if err != nil {
-			panic(err)
-		}
 		ds.Start(start, end)
 		printer.Print(ds)
 	}
