@@ -20,13 +20,13 @@ $ go get github.com/EwanValentine/deepscan
 
 This will scan a single host, with a port range of 8000 to 9000.
 ```
-$ deepscan single 192.168.0.1 --ports 8000:9000
+$ deepscan 192.168.0.1 --ports 8000:9000
 ```
 
 ### Multiple hosts
 This will scan every IP in a given CIDR block, with a port range of 1000 to 2000.
 ```
-$ deepscan multiple 192.168.1.1/24 --ports 1000:2000
+$ deepscan 192.168.1.1/24 --ports 1000:2000
 ```
 
 
