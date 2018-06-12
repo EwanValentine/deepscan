@@ -66,6 +66,7 @@ func (s *Scanner) Network(cidr string) error {
 	return nil
 }
 
+// Target sets a single IP
 func (s *Scanner) Target(ip string) {
 	s.ips = []string{ip}
 }
@@ -168,11 +169,6 @@ func (s *Scanner) Start(start, end uint32) {
 // Listen for results
 func (s *Scanner) Listen() <-chan *Result {
 	return s.Results
-}
-
-// Close closes any channels created
-func (s *Scanner) Close() {
-	close(s.Results)
 }
 
 // Stats returns
