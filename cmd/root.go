@@ -3,6 +3,7 @@ package cmd
 import (
 	"time"
 
+	"github.com/EwanValentine/deepscan/pkg/attacks"
 	"github.com/EwanValentine/deepscan/pkg/ports"
 	"github.com/EwanValentine/deepscan/pkg/printer"
 	"github.com/EwanValentine/deepscan/pkg/scanner"
@@ -54,7 +55,14 @@ func Execute() {
 	}
 
 	kingpin.Parse()
+
+	// Scanner
 	ds.Target(*ip)
 	ds.Start(start, end)
+
+	// Printer
 	printer.Print(ds)
+
+	// Attack
+	attacks.DenialOfService(ds)
 }

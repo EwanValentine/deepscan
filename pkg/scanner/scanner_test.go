@@ -8,7 +8,7 @@ import (
 
 func TestCanScanCIDRBlock(t *testing.T) {
 	s := New()
-	s.Network("192.168.1.1/24")
+	s.Target("192.168.1.1/24")
 	assert.Equal(t, 254, len(s.ips))
 	s.Start(80, 85)
 	<-s.OnStop()

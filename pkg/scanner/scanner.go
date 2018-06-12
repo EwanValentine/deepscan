@@ -2,7 +2,6 @@ package scanner
 
 import (
 	"fmt"
-	"net"
 	"strings"
 	"sync"
 	"time"
@@ -26,12 +25,20 @@ type PortScanResult struct {
 	Active bool
 }
 
-// Scanner is the main program
-type Scanner struct {
+// Scanner is a generic interface to allow users
+// to create multiple scanners
+type Scanner interface {
+	Host(ip string) (*Result, error)
+	Port(result *Result, port uint32) (*Result, error)
+}
+
+// DeepScan is the main program
+type DeepScan struct {
 	Results chan *Result
-	ips     []string
-	quit    chan struct{}
-	mu      *sync.Mutex
+	Scanner
+	ips  []string
+	quit chan struct{}
+	mu   *sync.Mutex
 
 	// Stats
 	start        time.Time
@@ -41,13 +48,15 @@ type Scanner struct {
 }
 
 // New marks the beginning of operation and retunes a new instance of Scanner.
-func New() *Scanner {
+func New() *DeepScan {
 	results := make(chan *Result, 1)
 	quit := make(chan struct{})
 	ips := []string{}
 	mutex := &sync.Mutex{}
-	return &Scanner{
+	thorough := &ThoroughScan{}
+	return &DeepScan{
 		Results: results,
+		Scanner: thorough,
 		ips:     ips,
 		quit:    quit,
 		start:   time.Now(),
@@ -56,7 +65,7 @@ func New() *Scanner {
 }
 
 // Network allows for a network CIDR range to be set
-func (s *Scanner) network(cidr string) error {
+func (s *DeepScan) network(cidr string) error {
 	ips, err := network.GetHosts(cidr)
 	if err != nil {
 		return err
@@ -69,7 +78,7 @@ func (s *Scanner) network(cidr string) error {
 }
 
 // Target sets a single IP
-func (s *Scanner) Target(ip string) {
+func (s *DeepScan) Target(ip string) {
 	if strings.Contains(ip, "/") {
 		s.network(ip)
 		return
@@ -77,60 +86,29 @@ func (s *Scanner) Target(ip string) {
 	s.ips = []string{ip}
 }
 
-func (s *Scanner) scan(ip string) *Result {
+func (s *DeepScan) scan(ip string) (*Result, error) {
 	s.mu.Lock()
 	s.ipsScanned++
 	s.mu.Unlock()
-
-	// Scan each ip address for an active host
-	reverse, err := net.LookupAddr(ip)
-
-	// Skip if not valid host found during lookup
-	if err != nil {
-		return nil
-	}
-
-	// @todo - handle these errors correctly
-	host, err := net.LookupHost(ip)
-	cname, err := net.LookupCNAME(ip)
-	return &Result{
-		Hosts:         host,
-		ReverseLookup: reverse,
-		Cname:         cname,
-		Addr:          ip,
-	}
+	return s.Scanner.Host(ip)
 }
 
-func (s *Scanner) scanPort(result *Result, port uint32) (*Result, error) {
+func (s *DeepScan) scanPort(result *Result, port uint32) (*Result, error) {
 	s.mu.Lock()
 	s.portsScanned++
 	s.mu.Unlock()
-
-	// Connect with a 1 second timeout
-	// @todo - make this configurable?
-	connection, err := net.DialTimeout(
-		"tcp", result.Addr+":"+fmt.Sprintf("%d", port),
-		time.Duration(1*time.Second),
-	)
-
-	// Port inactive
-	if err != nil {
-		return nil, err
-	}
-	connection.Close()
-
-	result.PortScan = &PortScanResult{
-		Port:   port,
-		Active: true,
-	}
-	return result, nil
+	return s.Scanner.Port(result, port)
 }
 
-func (s *Scanner) scanAsync(pipeline []string) <-chan *Result {
+func (s *DeepScan) scanAsync(pipeline []string) <-chan *Result {
 	out := make(chan *Result, len(s.ips))
 	go func() {
 		for _, ip := range pipeline {
-			res := s.scan(ip)
+			res, err := s.scan(ip)
+			if err != nil {
+				// @todo handle errors
+				continue
+			}
 			if res != nil {
 				out <- res
 			}
@@ -140,7 +118,7 @@ func (s *Scanner) scanAsync(pipeline []string) <-chan *Result {
 	return out
 }
 
-func (s *Scanner) portScanAsync(input <-chan *Result, start, end uint32) {
+func (s *DeepScan) portScanAsync(input <-chan *Result, start, end uint32) {
 	// Create a wait group here so's we can scan each port
 	// concurrently without prematurely moving on to the next
 	// ip address and closing the output channel prematurely.
@@ -167,8 +145,13 @@ func (s *Scanner) portScanAsync(input <-chan *Result, start, end uint32) {
 	close(s.Results)
 }
 
+// SetScanner allows the user to set a custom scanner
+func (s *DeepScan) SetScanner(scanner Scanner) {
+	s.Scanner = scanner
+}
+
 // Start the scan
-func (s *Scanner) Start(start, end uint32) {
+func (s *DeepScan) Start(start, end uint32) {
 	results := s.scanAsync(s.ips)
 	s.portScanAsync(results, start, end)
 	s.mu.Lock()
@@ -177,12 +160,12 @@ func (s *Scanner) Start(start, end uint32) {
 }
 
 // Listen for results
-func (s *Scanner) Listen() <-chan *Result {
+func (s *DeepScan) Listen() <-chan *Result {
 	return s.Results
 }
 
 // String returns some stats
-func (s *Scanner) String() string {
+func (s *DeepScan) String() string {
 	duration := s.end.Sub(s.start).Seconds()
 	return fmt.Sprintf(
 		"Scanned %d ips and %d ports in %f seconds",
