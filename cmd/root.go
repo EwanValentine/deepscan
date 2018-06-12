@@ -3,7 +3,6 @@ package cmd
 import (
 	"time"
 
-	"github.com/EwanValentine/deepscan/pkg/attacks"
 	"github.com/EwanValentine/deepscan/pkg/ports"
 	"github.com/EwanValentine/deepscan/pkg/printer"
 	"github.com/EwanValentine/deepscan/pkg/scanner"
@@ -64,5 +63,5 @@ func Execute() {
 	printer.Print(ds)
 
 	// Attack
-	attacks.DenialOfService(ds)
+	// attacks.DenialOfService(ds)
 }
