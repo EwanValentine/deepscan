@@ -11,7 +11,7 @@ import (
 // methods needed for the printer
 type scans interface {
 	Listen() <-chan *scanner.Result
-	Stats() string
+	String() string
 }
 
 // Print takes the scanner and prints out the results
@@ -23,7 +23,7 @@ func Print(ds scans) bool {
 		case res, more := <-ds.Listen():
 			if !more {
 				color.Blue("Complete...")
-				color.Green(ds.Stats())
+				color.Green(ds.String())
 				return true
 			}
 			color.Blue(fmt.Sprintf("Open: %s:%d", res.Addr, res.PortScan.Port))

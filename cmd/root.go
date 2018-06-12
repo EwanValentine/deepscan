@@ -33,12 +33,7 @@ var (
 	app = kingpin.New("deep-scanner", "A deep network analysis tool.")
 
 	portRange = kingpin.Flag("ports", "Port range 8080:8081").String()
-
-	single = kingpin.Command("single", "Single attack vector")
-	ip     = single.Arg("ip", "IP target address").Required().String()
-
-	multiple = kingpin.Command("multiple", "Multiple attack vectors")
-	cidr     = multiple.Arg("cidr", "CIDR block").Required().String()
+	ip        = kingpin.Arg("ip", "IP target address").Required().String()
 )
 
 // Execute command line interface
@@ -58,15 +53,8 @@ func Execute() {
 		panic(err)
 	}
 
-	switch kingpin.Parse() {
-	case "single":
-		ds.Target(*ip)
-		ds.Start(start, end)
-		printer.Print(ds)
-
-	case "multiple":
-		ds.Network(*cidr)
-		ds.Start(start, end)
-		printer.Print(ds)
-	}
+	kingpin.Parse()
+	ds.Target(*ip)
+	ds.Start(start, end)
+	printer.Print(ds)
 }

@@ -3,6 +3,7 @@ package scanner
 import (
 	"fmt"
 	"net"
+	"strings"
 	"sync"
 	"time"
 
@@ -36,6 +37,7 @@ type Scanner struct {
 	start        time.Time
 	end          time.Time
 	portsScanned uint32
+	ipsScanned   uint32
 }
 
 // New marks the beginning of operation and retunes a new instance of Scanner.
@@ -54,7 +56,7 @@ func New() *Scanner {
 }
 
 // Network allows for a network CIDR range to be set
-func (s *Scanner) Network(cidr string) error {
+func (s *Scanner) network(cidr string) error {
 	ips, err := network.GetHosts(cidr)
 	if err != nil {
 		return err
@@ -68,10 +70,18 @@ func (s *Scanner) Network(cidr string) error {
 
 // Target sets a single IP
 func (s *Scanner) Target(ip string) {
+	if strings.Contains(ip, "/") {
+		s.network(ip)
+		return
+	}
 	s.ips = []string{ip}
 }
 
 func (s *Scanner) scan(ip string) *Result {
+	s.mu.Lock()
+	s.ipsScanned++
+	s.mu.Unlock()
+
 	// Scan each ip address for an active host
 	reverse, err := net.LookupAddr(ip)
 
@@ -171,12 +181,12 @@ func (s *Scanner) Listen() <-chan *Result {
 	return s.Results
 }
 
-// Stats returns
-func (s *Scanner) Stats() string {
+// String returns some stats
+func (s *Scanner) String() string {
 	duration := s.end.Sub(s.start).Seconds()
 	return fmt.Sprintf(
 		"Scanned %d ips and %d ports in %f seconds",
-		len(s.ips),
+		s.ipsScanned,
 		s.portsScanned,
 		duration,
 	)
