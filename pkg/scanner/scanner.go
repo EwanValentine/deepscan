@@ -155,8 +155,8 @@ func (s *DeepScan) Start(start, end uint32) {
 	results := s.scanAsync(s.ips)
 	s.portScanAsync(results, start, end)
 	s.mu.Lock()
-	defer s.mu.Unlock()
 	s.end = time.Now()
+	s.mu.Unlock()
 }
 
 // Listen for results
@@ -166,11 +166,16 @@ func (s *DeepScan) Listen() <-chan *Result {
 
 // String returns some stats
 func (s *DeepScan) String() string {
+	s.mu.Unlock()
+	ipsScanned := s.ipsScanned
+	portsScanned := s.portsScanned
 	duration := s.end.Sub(s.start).Seconds()
+	s.mu.Lock()
+
 	return fmt.Sprintf(
 		"Scanned %d ips and %d ports in %f seconds",
-		s.ipsScanned,
-		s.portsScanned,
+		ipsScanned,
+		portsScanned,
 		duration,
 	)
 }
