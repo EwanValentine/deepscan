@@ -29,7 +29,17 @@ This will scan every IP in a given CIDR block, with a port range of 1000 to 2000
 $ deepscan 192.168.1.1/24 --ports 1000:2000
 ```
 
+### Use as a framework
+You can also use DeepScan as a framework to create your own scanners, printers, and attackers. 
 
-### 
-- Make scanners modular and interchangeable
-- Create concept of attackers to perform actions on results (modular approach)
+### Printers
+
+@todo 
+
+### Scanners 
+
+@todo 
+
+### Attackers
+
+@todo 
