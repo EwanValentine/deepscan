@@ -77,7 +77,7 @@ func (s *DeepScan) network(cidr string) error {
 	return nil
 }
 
-// Target sets a single IP
+// Target takes a single IP or a CIDR block
 func (s *DeepScan) Target(ip string) {
 	if strings.Contains(ip, "/") {
 		s.network(ip)
