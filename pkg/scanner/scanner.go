@@ -32,6 +32,14 @@ type Scanner interface {
 	Port(result *Result, port uint32) (*Result, error)
 }
 
+type printer interface {
+	Print(<-chan *Result, string)
+}
+
+type attacker interface {
+	Attack(<-chan *Result)
+}
+
 // DeepScan is the main program
 type DeepScan struct {
 	Results chan *Result
@@ -45,6 +53,8 @@ type DeepScan struct {
 	end          time.Time
 	portsScanned uint32
 	ipsScanned   uint32
+	attacker
+	printer
 }
 
 // New marks the beginning of operation and retunes a new instance of Scanner.
@@ -62,6 +72,20 @@ func New() *DeepScan {
 		start:   time.Now(),
 		mu:      mutex,
 	}
+}
+
+// SetAttacker allows for a custom attack type to be set
+func (s *DeepScan) SetAttacker(attacker attacker) {
+	s.mu.Lock()
+	s.attacker = attacker
+	s.mu.Unlock()
+}
+
+// SetPrinter allows for a customer printer type to be set
+func (s *DeepScan) SetPrinter(printer printer) {
+	s.mu.Lock()
+	s.printer = printer
+	s.mu.Unlock()
 }
 
 // Network allows for a network CIDR range to be set
@@ -157,6 +181,16 @@ func (s *DeepScan) Start(start, end uint32) {
 	s.mu.Lock()
 	s.end = time.Now()
 	s.mu.Unlock()
+}
+
+// Print output with the given printer
+func (s *DeepScan) Print() {
+	s.printer.Print(s.Listen(), s.String())
+}
+
+// Attack found potential targets given potential attack type
+func (s *DeepScan) Attack() {
+	s.attacker.Attack(s.Listen())
 }
 
 // Listen for results

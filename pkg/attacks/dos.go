@@ -14,17 +14,16 @@ const (
 	MaxCon = 10000
 )
 
-type scans interface {
-	Listen() <-chan *scanner.Result
-}
+// DenialOfService attack type
+type DenialOfService struct{}
 
-// DenialOfService listens for open ports from
+// Attack listens for open ports from
 // a scanner and begins to send high amounts of
 // traffic containing large headers.
-func DenialOfService(s scans) {
+func (dos *DenialOfService) Attack(results <-chan *scanner.Result) {
 	for {
 		select {
-		case res, more := <-s.Listen():
+		case res, more := <-results:
 			if more {
 				// color.Green("Attack complete")
 				go attack(res)
